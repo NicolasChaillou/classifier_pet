@@ -72,8 +72,7 @@ def load_features_df_1vs1(features_value_list):
 	print(">>>>> creating rdd from features-row list..")
 	features_rdd = sc.parallelize(features_row_list)
 	print(">>>>> creating dataframe from rdd..")
-	features_df = spark.createDataFrame(features_rdd)
-	return features_df
+	return spark.createDataFrame(features_rdd)
 
 def load_features_df_1vsAll(features_value_list,class1):
 	# [LOADING FEATURES] Feature files -> features-row list
@@ -88,8 +87,7 @@ def load_features_df_1vsAll(features_value_list,class1):
 	print(">>>>> creating rdd from features-row list..")
 	features_rdd = sc.parallelize(features_row_list)
 	print(">>>>> creating dataframe from rdd..")
-	features_df = spark.createDataFrame(features_rdd)
-	return features_df
+	return spark.createDataFrame(features_rdd)
 
 def convert_labels(train_features_df,test_features_df):
 	# [CONVERT LABELS] Convert string labels to floats with Estimator
@@ -119,8 +117,6 @@ def training(class1,class2):
 	                    convergenceTol=0.001    # condition which decides iteration termination. (default: 0.001)
 	                    )[source]
 	'''
-	# model parameters
-	model_number = 0
 	numIters = [10,50,100,300]
 	stepSizes = [1]
 	regParams = [0.01]
@@ -134,8 +130,7 @@ def training(class1,class2):
 	best_stepSize = None
 	best_regParam = None
 	# grid training
-	for numIter,stepSize,regParam in itertools.product(numIters,stepSizes,regParams):
-		model_number += 1
+	for model_number, (numIter, stepSize, regParam) in enumerate(itertools.product(numIters,stepSizes,regParams), start=1):
 		print(">>>>> Building model #%i.." % (model_number))
 		model = SVMWithSGD.train(train_features_lp, numIter, stepSize, regParam)
 		# [TEST] Guess labels on test data
@@ -212,7 +207,7 @@ def main():
 	# [CLASSIFIER SELECTION] Selecting classifiers (1vs1, 1vsAll)
 	# 1vs1 classifiers
 	for class1 in classes:
-		class2_set = [x for x in classes_dup]
+		class2_set = list(classes_dup)
 		del class2_set[0:(classes.index(class1)+1)]
 		print("classes")
 		print(classes)
